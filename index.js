@@ -147,7 +147,7 @@ class RfFansAccessory {
 	    fanService
 		  .getCharacteristic(Characteristic.RotationSpeed)
         	.setProps({
-                minValue: 1,
+                minValue: 0,
                 maxValue: 3,
                 minStep: 1
             })
