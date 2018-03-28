@@ -158,10 +158,12 @@ class RfFansAccessory {
 	}
 
 	fanStatusSpeed(callback) {
+		this._debugValues("fanStatusSpeed");
 		callback(null, this.lastFanSpeed);
 	}
 
 	fanChangeSpeed(value, callback) {
+		this._debugValues("fanChangeSpeed",value);
 		var speed;
 		switch(value) {
 			case 1:
@@ -184,9 +186,14 @@ class RfFansAccessory {
 		this.sendCommand(speed, callback);
 	}
 
+	_debugValues(text, newValue) {
+		this.log(`ON/OFF: ${this.isFanOn} SPEED: ${this.lastFanSpeed} ${text}: ${newValue}`);
+	}
+
 
 	// this is setting the fan off/ slow
 	fanChange(value, callback) {
+		this._debugValues("fanChange", value);
 		if(value && !this.isFanOn) {
 			// turning fan on so just set a speed if off
 			this.fanChangeSpeed(1, callback);
@@ -205,7 +212,8 @@ class RfFansAccessory {
 	}
 
 	getFanStatus(callback) {
-		callback(null, this.isFanOn > 0);
+		this._debugValues("getFanStatus");
+		callback(null, this.isFanOn);
 	}
 
 	lightChange(value, callback) {
