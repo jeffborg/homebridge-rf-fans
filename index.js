@@ -118,7 +118,8 @@ class RfFansAccessory {
 	    this.log = log;
 	    this.accessory = accessory;
 	    this.light = false;
-	    this.fanStatus = 0;
+	    this.lastFanSpeed = 1;
+	    this.isFanOn = false;
 
 	    if(!this.accessory.getService(Service.Lightbulb)) {
 	    	this.accessory.addService(Service.Lightbulb, "Light");
@@ -138,7 +139,7 @@ class RfFansAccessory {
     	 fanService.getCharacteristic(Characteristic.On)
 	    	  .on('get', this.getFanStatus.bind(this))
 	    	  .on('set', this.fanChange.bind(this))
-	    	  .value = (this.fanStatus>0);
+	    	  .value = this.isFanOn;
 
 	   	if(!fanService.getCharacteristic(Characteristic.RotationSpeed)) {
 	   		fanService.addCharacteristic(Characteristic.RotationSpeed);
@@ -146,23 +147,22 @@ class RfFansAccessory {
 	    fanService
 		  .getCharacteristic(Characteristic.RotationSpeed)
         	.setProps({
-                minValue: 0,
+                minValue: 1,
                 maxValue: 3,
                 minStep: 1
             })
 		  .on('get', this.fanStatusSpeed.bind(this))
 		  .on('set', this.fanChangeSpeed.bind(this))
-		  .value = this.fanStatus;
+		  .value = this.lastFanSpeed;
 
 	}
 
 	fanStatusSpeed(callback) {
-		callback(null, this.fanStatus);
+		callback(null, this.lastFanSpeed);
 	}
 
 	fanChangeSpeed(value, callback) {
-		this.fanStatus = value;
-		var speed = FAN_OFF;
+		var speed;
 		switch(value) {
 			case 1:
 				speed = FAN_LOW;
@@ -173,18 +173,39 @@ class RfFansAccessory {
 			case 3:
 				speed = FAN_HIGH;
 		}
+		// either speed is invalid of the fan is supposed to be off! don't do anything.
+		if(!speed || !this.isFanOn) {
+			callback();
+			return;
+		}
+		// save status and send command
+		this.lastFanSpeed = value;
+		this.isFanOn = true;
 		this.sendCommand(speed, callback);
 	}
 
 
 	// this is setting the fan off/ slow
 	fanChange(value, callback) {
-		this.fanStatus = value ? 1 : 0;
-		this.sendCommand(value ? FAN_LOW : FAN_OFF, callback);
+		if(value && !this.isFanOn) {
+			// turning fan on so just set a speed if off
+			this.fanChangeSpeed(1, callback);
+			return;
+		}
+		// so we are trying to turn the fan off here
+		if(!value && this.isFanOn) {
+			// trying to turn off and the fan is "on"
+			this.isFanOn = value;
+			this.sendCommand(FAN_OFF, callback);
+			return;
+		}
+		// do nothing call callback
+		callback();
+		// only execute fan off if the fan is currenlty on.
 	}
 
 	getFanStatus(callback) {
-		callback(null, this.fanStatus > 0);
+		callback(null, this.isFanOn > 0);
 	}
 
 	lightChange(value, callback) {
