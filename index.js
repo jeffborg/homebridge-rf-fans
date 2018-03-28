@@ -157,33 +157,54 @@ class RfFansAccessory {
 
 	}
 
+	// set the fan state 0-3 indicating a on/off or a speed
+	// if you leave newSpeed blank then the last speed will be used.
+	// null dosen't equal false or 0 so safe to use ==
+	_fanSetState(onOff, newSpeed, callback) {
+		if(newSpeed == 0) {
+			onOff == false;
+			newSpeed = null;
+		}
+		if(onOff == true && newSpeed == null) {
+			// no new speed set use last used setting
+			newSpeed = this.lastFanSpeed;
+		}
+
+		if(onOff == false && this.isFanOn == true) {
+			// turning fan off ignore newSpeed
+			this.isFanOn = false;
+			this.sendCommand(FAN_OFF, callback);
+			return;
+		}
+		if(newSpeed > 0) {
+			// turning fan on some speed
+			var speed = FAN_LOW;
+			switch(newSpeed) {
+				case 1:
+					speed = FAN_LOW;
+					break;
+				case 2:
+					speed = FAN_MED;
+					break;
+				case 3:
+					speed = FAN_HIGH;
+					break;
+			}
+			this.lastFanSpeed = newSpeed;
+			this.isFanOn = true;
+			this.sendCommand(speed, callback);
+			return;
+		}
+		// just call callback nothing to do here :)
+		callback(null);
+	}
+
 	fanStatusSpeed(callback) {
-		this._debugValues("fanStatusSpeed");
 		callback(null, this.lastFanSpeed);
 	}
 
 	fanChangeSpeed(value, callback) {
-		this._debugValues("fanChangeSpeed",value);
-		var speed;
-		switch(value) {
-			case 1:
-				speed = FAN_LOW;
-				break;
-			case 2:
-				speed = FAN_MED;
-				break;
-			case 3:
-				speed = FAN_HIGH;
-		}
-		// either speed is invalid of the fan is supposed to be off! don't do anything.
-		if(!speed || !this.isFanOn) {
-			callback();
-			return;
-		}
-		// save status and send command
-		this.lastFanSpeed = value;
-		this.isFanOn = true;
-		this.sendCommand(speed, callback);
+		this._fanSetState(null, value, callback);
 	}
 
 	_debugValues(text, newValue) {
@@ -193,22 +214,7 @@ class RfFansAccessory {
 
 	// this is setting the fan off/ slow
 	fanChange(value, callback) {
-		this._debugValues("fanChange", value);
-		if(value && !this.isFanOn) {
-			// turning fan on so just set a speed if off
-			this.fanChangeSpeed(1, callback);
-			return;
-		}
-		// so we are trying to turn the fan off here
-		if(!value && this.isFanOn) {
-			// trying to turn off and the fan is "on"
-			this.isFanOn = value;
-			this.sendCommand(FAN_OFF, callback);
-			return;
-		}
-		// do nothing call callback
-		callback();
-		// only execute fan off if the fan is currenlty on.
+		this._fanSetState(value, null, callback);
 	}
 
 	getFanStatus(callback) {
