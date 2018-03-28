@@ -197,11 +197,11 @@ class RfFansAccessory {
 	}
 
 	sendCommand(command, callback) {
-		console.log(`SENDING COMMAND TO ${this.accessory.context.name} as ${command ^ this.getMask()}`);
+		console.log(`SENDING COMMAND TO ${this.accessory.context.name} as ${command & this.getMask()}`);
 		var self = this;
 		// TODO move this to some form of config!
 		// TODO also listen for incoming commands to update state
-	  exec(`/usr/local/bin/send ${command}`, function (error, stdout, stderr) {
+	  exec(`/usr/local/bin/send ${command & this.getMask()}`, function (error, stdout, stderr) {
 	    // Error detection
 	    if (error) {
 	      self.log("Failed to run command");
@@ -215,6 +215,7 @@ class RfFansAccessory {
 	getMask() {
 		// var arr = [true, true, true, true];
 		if(!this.mask) {
+			console.log("SETTING MASK!");
 			var mask = 0xfff,
 				arr = this.accessory.context.switches;
 
@@ -222,6 +223,7 @@ class RfFansAccessory {
 				mask = mask ^ (arr[i] << (3-i)+4 )
 			}
 			this.mask = mask;
+			console.log("SETTING MASK! " + mask);
 		}
 
 		return this.mask;
