@@ -176,7 +176,7 @@ class RfFansAccessory {
 			this.sendCommand(FAN_OFF, callback);
 			return;
 		}
-		if(newSpeed > 0) {
+		if(newSpeed > 0 && (!this.isFanOn  || newSpeed != this.lastFanSpeed)) {
 			// turning fan on some speed
 			var speed = FAN_LOW;
 			switch(newSpeed) {
