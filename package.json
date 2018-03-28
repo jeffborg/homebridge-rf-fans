@@ -8,20 +8,12 @@
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "homebridge": "^0.4.38"
-  },
-  "dependencies": {
-    "homebridge-cmd4": "^1.2.0",
-    "homebridge-cmdswitch2": "^0.2.10"
-  },
   "engines": {
     "homebridge": ">=0.4.0",
     "node": ">=4.4.0"
   },
   "keywords": [
-    "homebridge-plugin",
-    "homebridge"
+    "homebridge-plugin"
   ]
 
 }
