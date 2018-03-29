@@ -242,7 +242,9 @@ class RfFansAccessory {
 	      self.log("Failed to run command");
 	      self.log(stderr);
 	    } 
-        callback();
+	    window.setTimeout(()=>{
+    	    callback(null);
+	    }, 300);
 	  });
 
 	}
