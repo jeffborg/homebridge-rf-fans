@@ -1,6 +1,7 @@
 "use strict";
-
-const lock = new require('async-lock'),
+	
+const AsyncLock = require('async-lock'),
+    lock = new AsyncLock({}),
 	exec = require("child_process").exec;
 
 let Accessory, Service, Characteristic, UUIDGen;
