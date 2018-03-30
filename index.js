@@ -236,7 +236,7 @@ class RfFansAccessory {
 	sendCommand(command, callback) {
 		var self = this;
 		// Promise mode
-		lock.acquire("rf-fans-send", function(cb, err) {
+		lock.acquire("rf-fans-send", function(cb) {
 
 			console.log(`SENDING COMMAND TO ${self.accessory.context.name} as ${command & self.getMask()}`);
 			// TODO move this to some form of config!
@@ -246,15 +246,14 @@ class RfFansAccessory {
 		    if (error) {
 		      self.log("Failed to run command");
 		      self.log(stderr);
-		    } 
+		    }  // end if err!
 		    setTimeout(() => {
 		    	cb();
-		    }, 300);
-
+		    }, 150); // end setTimeout
+		  }); // end EXEC!
 		}, function() {
     	    callback(null);
 		});	
-	  });
 
 	}
 
