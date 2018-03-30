@@ -241,7 +241,7 @@ class RfFansAccessory {
 			console.log(`SENDING COMMAND TO ${self.accessory.context.name} as ${command & self.getMask()}`);
 			// TODO move this to some form of config!
 			// TODO also listen for incoming commands to update state
-		  exec(`/usr/local/bin/send ${command & this.getMask()}`, function (error, stdout, stderr) {
+		  exec(`/usr/local/bin/send ${command & self.getMask()}`, function (error, stdout, stderr) {
 		    // Error detection
 		    if (error) {
 		      self.log("Failed to run command");
