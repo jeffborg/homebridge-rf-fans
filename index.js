@@ -1,8 +1,9 @@
 "use strict";
 
-var exec = require("child_process").exec;
+const lock = new require('async-lock'),
+	exec = require("child_process").exec;
 
-var Accessory, Service, Characteristic, UUIDGen;
+let Accessory, Service, Characteristic, UUIDGen;
 
 module.exports = function(homebridge) {
   
@@ -232,19 +233,26 @@ class RfFansAccessory {
 	}
 
 	sendCommand(command, callback) {
-		console.log(`SENDING COMMAND TO ${this.accessory.context.name} as ${command & this.getMask()}`);
 		var self = this;
-		// TODO move this to some form of config!
-		// TODO also listen for incoming commands to update state
-	  exec(`/usr/local/bin/send ${command & this.getMask()}`, function (error, stdout, stderr) {
-	    // Error detection
-	    if (error) {
-	      self.log("Failed to run command");
-	      self.log(stderr);
-	    } 
-	    setTimeout(() => {
+		// Promise mode
+		lock.acquire("rf-fans-send", function(cb, err) {
+
+			console.log(`SENDING COMMAND TO ${this.accessory.context.name} as ${command & this.getMask()}`);
+			// TODO move this to some form of config!
+			// TODO also listen for incoming commands to update state
+		  exec(`/usr/local/bin/send ${command & this.getMask()}`, function (error, stdout, stderr) {
+		    // Error detection
+		    if (error) {
+		      self.log("Failed to run command");
+		      self.log(stderr);
+		    } 
+		    setTimeout(() => {
+		    	cb();
+		    }, 300);
+
+		}, function() {
     	    callback(null);
-	    }, 300);
+		});	
 	  });
 
 	}
